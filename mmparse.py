@@ -276,5 +276,9 @@ if __name__ == '__main__':
             pass
 
     new_recipes.save_to_csv()
+
+    with open("failed_recipes.txt", "w") as f:
+        for item in failed_files:
+            f.write("%s\n" % item)
     print(failed_files)
     print("Done")

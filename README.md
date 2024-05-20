@@ -14,7 +14,13 @@ The recipes are stored in a csv file with the same name as the input file plus .
 Either pass in a single file or a directory in which the files, you wish to parse,
 reside in. 
 
-E.g: python mmparse.py {file or directory}
+First install the dependencies using this command: 
+
+pip install -r requirements.txt
+
+Then you can use the script using the following notation:
+
+python mmparse.py {file or directory}
 
 The csv will be created either in the supplied directory or in case of a single file
 just directly where the parser was called.

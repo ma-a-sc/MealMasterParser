@@ -16,11 +16,11 @@ reside in.
 
 First install the dependencies using this command: 
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 Then you can use the script using the following notation:
 
-python mmparse.py {file or directory}
+`python mmparse.py {file or directory}`
 
 The csv will be created either in the supplied directory or in case of a single file
 just directly where the parser was called.

@@ -30,7 +30,6 @@ def split_line_in_middle(line: str) -> list[str]:
 
 # --- Classes --- #
 class Recipe(object):
-    version: int
     title: str
     categories: list[str]
     servings: str
@@ -43,7 +42,7 @@ class Recipe(object):
     def __init__(self, recipe_lines: list[str]) -> None:
         self.title = ""
         self.categories = []
-        self.servings = 0
+        self.servings = "0"
         self.ingredients = {}
         self.directions = []
         self.parse_and_store_recipe(recipe_lines)

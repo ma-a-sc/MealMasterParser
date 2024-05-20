@@ -123,7 +123,6 @@ class Recipe(object):
         return False
 
     def parse_header_section(self, header_lines: list[str]) -> None:
-        print(header_lines)
         for line in header_lines:
             start = line.split(":")
 
@@ -268,6 +267,7 @@ if __name__ == '__main__':
     new_recipes = RecipesArr(out_path)
     for file in files:
         try:
+            print(file)
             new_recipes.parse_file(file)
         except Exception as e:
             print(e)

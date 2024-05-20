@@ -5,14 +5,13 @@ Version 7 and 8 are supported or rather on these and for these
 versions the parser was developed.
 
 The parser first tries to detect the file format and if it is not
-utf-8 convert the file into that format.
+utf-8 convert the file into utf-8.
 
-The recipes are stored in a csv file which has the same name as the input 
-with .csv a an added suffix.
+The recipes are stored in a csv file with the same name as the input file plus .csv added as a suffix.
 
 **Usage**
 
-Either pass in a single file or a directory in which the files you wish to parse
+Either pass in a single file or a directory in which the files, you wish to parse,
 reside in. 
 
 E.g: python mmparse.py {file or directory}

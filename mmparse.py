@@ -33,7 +33,7 @@ class Recipe(object):
     version: int
     title: str
     categories: list[str]
-    servings: int
+    servings: str
     ingredients: dict[str, list[str]]
     directions: list[str]
 
@@ -55,7 +55,7 @@ class Recipe(object):
         self.categories = line.split(":")[1].strip().split(",")
 
     def parse_and_set_servings(self, line: str) -> None:
-        self.servings = int(line.split(":")[1].strip().split(" ")[0])
+        self.servings = line.split(":")[1].strip()
 
     @staticmethod
     def split_ingredients_line_to_left_right(line: str) -> tuple[str, str]:
@@ -119,7 +119,7 @@ class Recipe(object):
 
     @staticmethod
     def check_end_line(line: str) -> bool:
-        if line.strip().startswith("MMMMM") or line.strip().startswith("-----") and len(set(line.strip())) <= 1 and len(line.strip()) == 5:
+        if line.strip().startswith("MMMMM") or line.strip().startswith("-----") and len(set(line.strip())) <= 1 and set(line.strip()).pop() == "-":
             return True
         return False
 
@@ -201,18 +201,14 @@ class Recipe(object):
         return {"title": self.title, "categories": categories, "servings": self.servings, "ingredients": ingredients, "directions": directions}
 
 class RecipesArr(object):
-    input_file_name: str
     output_file_name: str
     df: DataFrame
     arr: list[Recipe]
 
-    def __init__(self, file_name, output_file_name):
-        self.file_name = file_name
+    def __init__(self, output_file_name):
         self.output_file_name = output_file_name
         self.arr = []
         self.df = None
-        self.__parse_file()
-        self.__load_data()
 
     def __load_data(self):
         for recipe in self.arr:
@@ -222,13 +218,13 @@ class RecipesArr(object):
             self.df.extend(DataFrame(recipe.to_dict()))
 
 
-    def __parse_file(self) -> None:
-        with open(self.file_name, "rb") as raw_bytes:
+    def parse_file(self, file_name) -> None:
+        with open(file_name, "rb") as raw_bytes:
             raw_data = raw_bytes.read()
             result = chardet.detect(raw_data)
             original_encoding = result.get("encoding")
 
-        with open(self.file_name, "r", encoding=original_encoding) as f:
+        with open(file_name, "r", encoding=original_encoding) as f:
             lines = f.readlines()
         lines = lines[1:]
 
@@ -248,6 +244,7 @@ class RecipesArr(object):
             previous = index + 3
 
     def save_to_csv(self):
+        self.__load_data()
         self.df.write_csv(self.output_file_name)
 
 
@@ -256,24 +253,28 @@ def get_files_in_directory(dir_path):
 
 if __name__ == '__main__':
     path = sys.argv[1]
+    out_path = sys.argv[2]
 
     if not os.path.isdir(path):
-        new_recipes = RecipesArr(path, "{}.csv".format(path))
+        new_recipes = RecipesArr(out_path)
+        new_recipes.parse_file(path)
         new_recipes.save_to_csv()
+        sys.exit(0)
 
     # first list all the recipes and then do what is needed
     os.chdir(path)
     files = get_files_in_directory(path)
 
     failed_files = []
+    new_recipes = RecipesArr(out_path)
     for file in files:
         try:
-            new_recipes = RecipesArr(file, "{}.csv".format(file))
-            new_recipes.save_to_csv()
+            new_recipes.parse_file(file)
         except Exception as e:
             print(e)
             failed_files.append(file)
             pass
 
+    new_recipes.save_to_csv()
     print(failed_files)
     print("Done")

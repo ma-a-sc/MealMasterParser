@@ -30,10 +30,11 @@ def split_line_in_middle(line: str) -> list[str]:
 
 # --- Classes --- #
 class Recipe(object):
+    version: int
     title: str
     categories: list[str]
     servings: str
-    ingredients: dict[str, list[str]]
+    ingredients: list[str]
     directions: list[str]
 
     def __str__(self):
@@ -42,8 +43,8 @@ class Recipe(object):
     def __init__(self, recipe_lines: list[str]) -> None:
         self.title = ""
         self.categories = []
-        self.servings = "0"
-        self.ingredients = {}
+        self.servings = 0
+        self.ingredients = []
         self.directions = []
         self.parse_and_store_recipe(recipe_lines)
 
@@ -62,41 +63,37 @@ class Recipe(object):
         split_line = split_line_in_middle(line)
         return split_line[0].strip(), split_line[1].strip()
 
-    def parse_ingredient_line(self, line: str, section: str) -> None:
+    def parse_ingredient_line(self, line: str) -> None:
         stripped_and_split_line = line.strip().split("     ")
         if len(stripped_and_split_line) >= 2:
             left = stripped_and_split_line[0]
             right = stripped_and_split_line[len(stripped_and_split_line) - 1]
-            current_ingredients_of_section = self.ingredients.get(section, [])
 
-            current_ingredients_of_section.append(right)
-            current_ingredients_of_section.append(left)
-
-            self.ingredients[section] = current_ingredients_of_section
-
+            self.ingredients.append(left)
+            self.ingredients.append(right)
             return
-
-        current_ingredients_of_section = self.ingredients.get(section, [])
-        current_ingredients_of_section.append(stripped_and_split_line[0])
-        self.ingredients[section] = current_ingredients_of_section
+        self.ingredients.append(stripped_and_split_line[0])
 
     def ingredients_are_set(self):
         return self.ingredients != {}
 
     @staticmethod
     def check_if_ingredients_line(line: str) -> bool:
-        quantifier = line[:8]
+        quantifier = line[:9]
         unit = line[9:11]
 
+        quantifier_present = False
+        unit_present = False
+
         for q in quantifier.strip():
-            if q not in QUANTIFIERS:
-                return False
+            if q in QUANTIFIERS:
+                quantifier_present = True
 
         for u in unit.strip():
-            if u not in UNITS:
-                return False
+            if u in UNITS:
+                unit_present = True
 
-        return True
+        return True if quantifier_present or unit_present else False
 
     @staticmethod
     def parse_ingredients_heading_line(line: str) -> str:
@@ -141,14 +138,10 @@ class Recipe(object):
                     print("Weird stuff in heading section.")
 
     def parse_ingredients_section(self, ingredient_lines: list[str]) -> None:
-        ingredients_section = "main"
         for line in ingredient_lines:
 
             if self.check_if_ingredients_line(line):
-                self.parse_ingredient_line(line, ingredients_section)
-
-            if self.check_ingredient_heading_line(line):
-                ingredients_section = self.parse_ingredients_heading_line(line)
+                self.parse_ingredient_line(line)
 
     def parse_directions_section(self, directions_sections: list[list[str]]) -> None:
         for directions_section in directions_sections:
@@ -185,16 +178,9 @@ class Recipe(object):
             return False
         return True
 
-    def ingredients_to_string(self):
-        result = ""
-        for key, value in self.ingredients.items():
-            result += f"{key}: {value} ---"
-
-        return result
-
     def to_dict(self):
         categories = ",".join(self.categories)
-        ingredients = self.ingredients_to_string()
+        ingredients = "---".join(self.ingredients)
         directions = "---".join(self.directions)
         return {"title": self.title, "categories": categories, "servings": self.servings, "ingredients": ingredients, "directions": directions}
 
@@ -267,7 +253,6 @@ if __name__ == '__main__':
     new_recipes = RecipesArr(out_path)
     for file in files:
         try:
-            print(file)
             new_recipes.parse_file(file)
         except Exception as e:
             print(e)
@@ -275,9 +260,5 @@ if __name__ == '__main__':
             pass
 
     new_recipes.save_to_csv()
-
-    with open("failed_recipes.txt", "w") as f:
-        for item in failed_files:
-            f.write("%s\n" % item)
     print(failed_files)
     print("Done")

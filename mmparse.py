@@ -30,7 +30,6 @@ def split_line_in_middle(line: str) -> list[str]:
 
 # --- Classes --- #
 class Recipe(object):
-    version: int
     title: str
     categories: list[str]
     servings: str
@@ -43,7 +42,7 @@ class Recipe(object):
     def __init__(self, recipe_lines: list[str]) -> None:
         self.title = ""
         self.categories = []
-        self.servings = 0
+        self.servings = "0"
         self.ingredients = []
         self.directions = []
         self.parse_and_store_recipe(recipe_lines)
@@ -253,6 +252,7 @@ if __name__ == '__main__':
     new_recipes = RecipesArr(out_path)
     for file in files:
         try:
+            print(file)
             new_recipes.parse_file(file)
         except Exception as e:
             print(e)
@@ -260,5 +260,9 @@ if __name__ == '__main__':
             pass
 
     new_recipes.save_to_csv()
+
+    with open("failed_recipes.txt", "w") as f:
+        for item in failed_files:
+            f.write("%s\n" % item)
     print(failed_files)
     print("Done")
